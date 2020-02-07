@@ -224,7 +224,7 @@ export default {
   },
   methods:{
     submit(){
-      console.log(this.title,this.quantity,this.due)
+      // console.log(this.title,this.quantity,this.due)
     }
     // getEvents ({ start, end }) {
     //     const events = []
