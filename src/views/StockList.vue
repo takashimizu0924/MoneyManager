@@ -1,25 +1,33 @@
 <template>
   <v-data-table
     :headers="headers"
-    :items="itemlists"
+    :items="datalists"
     :items-per-page="5"
     class="elevation-1"
-  ></v-data-table>
+  ><template slot="items" slot-scope="props">
+    <td class="text-xs-center">{{ props.item.itemname }}</td>
+    <td class="text-xs-center">{{ props.item.itemquantity }}</td>
+    <td class="text-xs-center">{{ props.item.itemstockyard }}</td>
+    </template>
+  </v-data-table>
 </template>
 
 <script>
+import axios from 'axios'
 export default {
     data(){
         return{
-            headers: [
+          datalists:[],
+
+          headers: [
           {
             text: '商品名',
             align: 'left',
             sortable: false,
-            value: 'name',
+            value: 'itemname',
           },
-          { text: '数量', value: 'calories' },
-          { text: '保管場所', value: 'fat' },
+          { text: '数量', value: 'itemquantity' },
+          { text: '保管場所', value: 'itemstockyard' },
           { text: '登録日', value: 'carbs' },
           { text: '更新日', value: 'protein' },
           { text: '登録者', value: 'iron' },
@@ -76,7 +84,13 @@ export default {
           
         ],
       }
-        }
+        },
+        mounted(){
+            axios.get("http://localhost:9090/allstockitems").then(res =>{
+            this.datalists = res.data;
+            console.log(this.datalists)
+            })
+          },
     }
 
 </script>

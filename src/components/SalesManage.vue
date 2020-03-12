@@ -15,8 +15,8 @@
                     </v-col>
                 </v-row>
                 <v-row justify="center">
-                    <v-col cols="9">
-                        <sales-chart  />
+                    <v-col cols="9" md="10">
+                        <sales-chart />
                     </v-col>
                 </v-row>
             </v-layout>
@@ -29,6 +29,7 @@
 
   <script>
  import SalesChart from './SalesChart.vue'
+//  import axios from 'axios'
 
  export default {
      components:{ SalesChart },
@@ -41,6 +42,7 @@
                  {title:'年次売上',dataname:'10000000円'},
              ]
          }
-     }
+     },
+     
  }
  </script>

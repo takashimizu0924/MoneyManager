@@ -1,7 +1,7 @@
 <template>
     <v-dialog max-width="600px" v-model="dialog">
         <template v-slot:activator="{ on }">
-            <v-btn text v-on="on" class="light-blue darken-1 white--text text--bold">商品登録</v-btn>
+            <v-btn text v-on="on" class="light-blue darken-1 white--text">商品登録</v-btn>
         </template>
         <v-card>
                 <v-card-title>

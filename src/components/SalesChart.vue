@@ -1,65 +1,74 @@
 <script>
-import { Bar} from 'vue-chartjs';
+import { Bar } from 'vue-chartjs';
+import axios from 'axios'
+// import { ReactivePropMixin } from 'vue-chartjs/types/mixins';
+
 
 export default {
-    extends: Bar,
-  name: 'chart',
-  data () {
-    return {
-      data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
-        datasets: [
-          {
-            label: 'Bar Dataset',
-            data: [10, 20, 30, 40, 50, 30],
-            backgroundColor: [
-              'rgba(255, 99, 132, 0.2)',
-              'rgba(54, 162, 235, 0.2)',
-              'rgba(255, 206, 86, 0.2)',
-              'rgba(75, 192, 192, 0.2)',
-              'rgba(153, 102, 255, 0.2)',
-              'rgba(255, 159, 64, 0.2)'
-            ],
-            borderColor: [
-              'rgba(255, 99, 132, 1)',
-              'rgba(54, 162, 235, 1)',
-              'rgba(255, 206, 86, 1)',
-              'rgba(75, 192, 192, 1)',
-              'rgba(153, 102, 255, 1)',
-              'rgba(255, 159, 64, 1)'
-            ],
-            borderWidth: 1
-          },
-          {
-            label: 'Line Dataset',
-            data: [10, 50, 20, 30, 30, 40],
-            borderColor: '#CFD8DC',
-            fill: false,
-            type: 'line',
-            lineTension: 0.3,
-          }
-        ]
-      },
-      options: {
-        scales: {
-          xAxes: [{
-            scaleLabel: {
-              display: true,
-              labelString: 'Month'
-            }
-          }],
-          yAxes: [{
-            ticks: {
-              beginAtZero: true,
-              stepSize: 10,
-            }
-          }]
-        }
-      }
+  extends: Bar,
+  data(){
+    return{
+      datacollection:null,
+      price:[],
+      salelabel:[],
+      // chartPrice:[]
     }
   },
-  mounted () {
-    this.renderChart(this.data, this.options)
+  async mounted(){
+    await this.getRandomInt()
+    this.fillData()
+    this.renderChart(this.datacollection)
+  },
+  methods:{
+    fillData(){
+      
+      this.datacollection = {
+        labels: this.label,
+          datasets: [
+            {
+              label: 'Data One',
+              backgroundColor: '#f87979',
+              data:this.chartPrice
+            }
+          ]
+      }
+      console.log("a")
+    },
+    async getRandomInt () {
+        await axios.get("http://localhost:9090/allsales?").then(res => {
+        // this.price = res.data[1].salesprice
+        // var base = res.data
+        // console.log("データ",base)
+        var p = []
+        var l = []
+        for(var i = 0;i<res.data.length;i ++){
+          var aaa = res.data[i].salesprice
+          var ccc = res.data[i].CreatedAt.split('T',1)
+          p.push(aaa)
+          l.push(ccc)
+        }
+        // var aaa = res.data[0].salesprice
+        // var bbb = res.data[1].salesprice
+        // var ccc = res.data[0].CreatedAt.split('T',1)
+        // var ddd = res.data[1].CreatedAt.split('T',1)
+        // p.push(aaa)
+        // p.push(bbb)
+        // l.push(ccc)
+        // l.push(ddd)
+        this.price = p
+        this.salelabel = l
+        console.log(this.price)
+        })
+      }
+    },
+    watch:{
+      price:function(){
+        this.chartPrice = this.price
+      },
+      salelabel:function(){
+        this.label = this.salelabel
+      }
+    }
   }
-}
+
 </script>
