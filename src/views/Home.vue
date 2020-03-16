@@ -74,6 +74,7 @@
               <v-text-field v-model="stockitem" label="商品名を登録"></v-text-field>
               <v-text-field v-model="stockquantity" label="数量を入力"></v-text-field>
               <v-select :items="stockyard" v-model="stockyard" label="保管場所を選択"></v-select>
+              <v-text-field v-model="stockCreatedBy" label="登録者"></v-text-field>
               <v-menu>
                   <v-text-field :value="due" slot="activator" label="更新日"></v-text-field>
                   <v-date-picker v-model="due"></v-date-picker>
@@ -163,6 +164,7 @@ export default {
       productname:'',
       stockitem:'',
       stockquantity:'',
+      stockCreatedBy:'',
       salescode:'',
       receiptnumber:'',
       sectionname:'',
@@ -219,6 +221,7 @@ export default {
       params.append('itemname',this.stockitem)
       params.append('itemquantity',this.stockquantity)
       params.append('itemstockyard',this.stockyard)
+      params.append('CreatedBy',this.stockCreatedBy)
       params.append('CreatedAt',this.due)
       axios.post("http://localhost:9090/stockitem?" + params).then(res =>{
         console.log(res.data.productcode)
@@ -268,13 +271,13 @@ export default {
     //   ))
       
     // },
-    getcode(){
-      axios.get("http://localhost:9090/product?productname=" + this.getproductname).then(res =>(
+    async getcode(val){
+      await axios.get("http://localhost:9090/productname?productname=" + val).then(res =>(
       this.getsalesprice = res.data[0].price
       ))
     },
-    getallproduct(){
-      axios.get("http://localhost:9090/allproduct").then(res =>(
+    async getallproduct(val){
+      await axios.get("http://localhost:9090/product?productsection=" + val).then(res =>(
       console.log(res.data),
       this.getproduct = res.data
       // this.getsalesprice = res.data.price
@@ -336,16 +339,14 @@ export default {
         deep:true,
         handler(val){
           console.log(val)
-          this.getcode();
+          this.getcode(val);
         },
       },
       sectionname:{
         deep:true,
         handler(val){
           // console.log(val)
-          if (val === 'エアコン')
-          
-          this.getallproduct();
+          this.getallproduct(val);
         },
       }
     },
