@@ -84,21 +84,72 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="dialog2" width="400px">
+      <v-dialog v-model="dialog2" width="800px">
         <v-card>
           <v-card-title>売上登録</v-card-title>
           <v-card-text>
-              <v-text-field v-model="receiptnumber" label="伝票番号を入力してください"></v-text-field>
+            <v-container>
+              <v-row>
+                <v-col class="ml-3" cols="12" sm="8" md="4">
+                  <v-text-field v-model="receiptnumber" label="伝票番号を入力してください"></v-text-field>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="6" md="4">
+                   <v-text-field v-model="gestname" label="お客様名を入力してください"></v-text-field>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="6" md="3">
+                   <v-menu v-model="completedDate" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
+                     <template v-slot:activator="{ on }">
+                       <v-text-field v-model="date" label="完了日" readonly v-on="on"></v-text-field>
+                     </template>
+                     <v-date-picker v-model="date" @input="completedDate = false"></v-date-picker>
+                   </v-menu>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="4" md="4">
+                  <v-select :items="productsections" v-model="sectionname" label="商品区分"></v-select>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="6" md="4">
+                  <v-select :items="getproduct" item-text="productname" no-data-text="項目がありません" v-model="getproductname" label="商品名を選択してください">
+                    <option value="" v-for="product in getproduct" :key="product.productname">
+                      <v-span>
+                      {{product.productname}}
+                      </v-span>
+                    </option>
+                  </v-select>  
+                </v-col>
+                
+                <v-col class="ml-3" cols="12" sm="4" md="4">
+                  <v-text-field v-model="salesquantity" label="数量"></v-text-field>
+                </v-col>
+                <v-col class="ml-6 mt-5" cols="12" sm="6" md="4">
+                  <span>{{ sumprice }}円</span>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="6" md="4">
+                  <v-menu>
+                    <v-text-field :value="due" slot="activator" label="登録日"></v-text-field>
+                    <v-date-picker v-model="due"></v-date-picker>
+                  </v-menu>
+                </v-col>
+                <v-col class="ml-3" cols="12" sm="6" md="4">
+                  <v-text-field v-model="createdby" label="登録者名"></v-text-field>
+                </v-col>
+              </v-row>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn class="red white--text" @click="salescardreset">リセット</v-btn>
+                <v-btn class="blue white--text" @click="addsales">登録</v-btn>
+              </v-card-actions>
+            </v-container>
+              <!-- <v-text-field v-model="receiptnumber" label="伝票番号を入力してください"></v-text-field>
               <v-text-field v-model="gestname" label="お客様名を入力してください"></v-text-field>
-              <v-select :items="productsections" v-model="sectionname" label="商品区分"></v-select>
+              <v-select :items="productsections" v-model="sectionname" label="商品区分"></v-select> -->
               <!-- <v-text-field v-model="salescode" label="商品コード"></v-text-field> -->
-                <v-select :items="getproduct" item-text="productname" no-data-text="項目がありません" v-model="getproductname" label="商品名を選択してください">
+                <!-- <v-select :items="getproduct" item-text="productname" no-data-text="項目がありません" v-model="getproductname" label="商品名を選択してください">
                   <option value="" v-for="product in getproduct" :key="product.productname">
                     <span v-bind="product.productname">
                     {{product.productname}}
                     </span>
                   </option>
-                </v-select>              <!-- <span>{{ getproduct }}</span> -->
+                </v-select>              
               <v-text-field v-model="salesquantity" label="数量"></v-text-field>
               <span>{{ sumprice }}円</span>
               <v-menu>
@@ -106,7 +157,7 @@
                   <v-date-picker v-model="due"></v-date-picker>
               </v-menu>
               <v-text-field v-model="createdby" label="登録者名"></v-text-field>
-              <v-btn class="blue white--text" @click="addsales">登録</v-btn>
+              <v-btn class="blue white--text" @click="addsales">登録</v-btn> -->
           </v-card-text>
         </v-card>
       </v-dialog>
@@ -155,8 +206,13 @@
 <script>
 // @ is an alias to /src
 import axios from 'axios'
-
+// import format from 'vue-date-fns/format'
 export default {
+  // filters:{
+  //   dateFormatter: function(date){
+  //     return format(date,'YYYY/MM/DD')
+  //   }
+  // },
   data(){
     return{
       productcode:'',
@@ -181,7 +237,9 @@ export default {
       dialog3:false,
       dialog4:false,
       dialog5:false,
-
+      getitemname:'',
+      completedDate:false,
+      date:'',
       productsections:[
         'エアコン','アンテナ','電気工事','食洗機','ウォシュレット','照明'
       ],
@@ -229,41 +287,48 @@ export default {
         console.log(res.data.productname)
         console.log(this.due)
       });
+      this.dialog1 = false
     },
     // 売上登録 salescode
     addsales(){
       var params = new URLSearchParams()
       params.append('code',this.salescode)
       params.append('salesquantity',this.salesquantity)
-      params.append('salesname',this.getproduct)
+      params.append('salesname',this.getproductname)
       params.append('salesprice',this.sumprice)
       params.append('gestname',this.gestname)
       params.append('receiptnumber',this.receiptnumber)
-      params.append('sectionname',this.getproductname)
+      params.append('sectionname',this.sectionname)
       params.append('gestname',this.gestname)
       params.append('created_by',this.createdby)
       params.append('CreatedAt',this.due)
+      params.append('completeddate',this.date)
       axios.post("http://localhost:9090/sales?" + params)
-      this.salescode = ''
-      this.salesquantity = ''
-      this.getproduct = ''
-      this.sumprice = ''
-      this.gestname = ''
-      this.receiptnumber = ''
-      this.sectionname = ''
-      this.gestname = ''
-      this.created_by = ''
+      alert("売上を登録しました")
+      // console.log(this.getproductname)
+      // this.salescode = '',
+      // this.salesquantity = '',
+      // this.getproduct = '',
+      // this.sumprice = '',
+      // this.gestname = '',
+      // this.receiptnumber = '',
+      // this.sectionname = '',
+      // this.gestname = '',
+      // this.created_by = '',
+      // this.getproduct = ''
     },
     salescardreset(){
-      this.salescode = ''
-      this.salesquantity = ''
-      this.getproduct = ''
-      this.sumprice = ''
-      this.gestname = ''
-      this.receiptnumber = ''
-      this.sectionname = ''
-      this.gestname = ''
-      this.created_by = ''
+      this.salescode = '',
+      this.salesquantity = '',
+      this.getproduct = '',
+      this.sumprice = '',
+      this.gestname = '',
+      this.receiptnumber = '',
+      this.sectionname = '',
+      this.gestname = '',
+      this.created_by = '',
+      this.getproductname = '',
+      this.date = ''
     },
     // testfunc(params){
     //   axios.get("http://localhost:9090/product?productcode=" + params).then(res =>(
@@ -273,7 +338,8 @@ export default {
     // },
     async getcode(val){
       await axios.get("http://localhost:9090/productname?productname=" + val).then(res =>(
-      this.getsalesprice = res.data[0].price
+      this.getsalesprice = res.data[0].price,
+      this.salescode = res.data[0].productcode
       ))
     },
     async getallproduct(val){

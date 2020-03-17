@@ -46,12 +46,12 @@
 
 <script>
 import axios from 'axios'
-import dateFilter from 'date-fns/format'
+// import dateFilter from 'date-fns/format'
 
 export default {
-  filters:{
-    date: dateFilter
-    },
+  // filters:{
+  //   // date: dateFilter
+  //   },
     data(){
         return{
           datalists:[],
@@ -83,8 +83,7 @@ export default {
         },
         async mounted(){
             await axios.get("http://localhost:9090/allstockitems").then(res =>{
-            this.datalists = res.data;
-            
+            this.datalists = res.data
             })
           },
         methods:{
